@@ -1,147 +1,105 @@
-<!-- Create/Edit Quiz -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Create/Edit Quiz</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Create Quiz</title>
+    <style>
+        :root {
+            --ink: #1f2937;
+            --muted: #64748b;
+            --brand: #0f766e;
+            --brand-dark: #134e4a;
+            --accent: #f59e0b;
+            --surface: rgba(255, 252, 246, 0.9);
+            --border: rgba(15, 118, 110, 0.14);
+            --shadow: 0 24px 60px rgba(31, 41, 55, 0.12);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(245, 158, 11, 0.24), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.22), transparent 22%),
+                linear-gradient(135deg, #f8f4ea 0%, #eef8f6 52%, #f6efe3 100%);
+        }
+        .page-shell { max-width: 1080px; margin: 0 auto; padding: 24px 24px 48px; }
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 22px;
+        }
+        .brand {
+            font-size: 1.5rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--brand-dark);
+        }
+        .brand span { color: var(--accent); }
+        .nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
+        .nav-links a, button {
+            text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; transition: transform 0.2s ease;
+        }
+        .nav-links a:hover, button:hover { transform: translateY(-2px); }
+        .primary, button {
+            color: #fff; background: linear-gradient(135deg, var(--brand), #14b8a6); box-shadow: 0 16px 28px rgba(15, 118, 110, 0.22);
+        }
+        .secondary {
+            color: var(--brand-dark); background: rgba(255,255,255,0.74); border: 1px solid rgba(15,118,110,0.16);
+        }
+        .hero, .form-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 28px; box-shadow: var(--shadow); backdrop-filter: blur(10px);
+        }
+        .hero, .form-card { padding: 28px; }
+        .hero { margin-bottom: 22px; }
+        .eyebrow {
+            display: inline-flex; padding: 8px 14px; border-radius: 999px; background: rgba(15, 118, 110, 0.1); color: var(--brand-dark); font-size: 0.84rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        }
+        h1 { margin: 16px 0 10px; font-size: clamp(2rem,5vw,3.3rem); line-height: 1; letter-spacing: -0.04em; }
+        p { margin: 0; color: var(--muted); line-height: 1.72; }
+        form { display: grid; gap: 18px; }
+        .field { display: grid; gap: 8px; }
+        label { font-weight: 800; color: var(--brand-dark); }
+        input[type="text"], input[type="number"] {
+            width: 100%; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(15,118,110,0.18); background: #fff; font-size: 1rem; color: var(--ink);
+        }
+        input:focus { outline: 2px solid rgba(20,184,166,0.24); border-color: rgba(15,118,110,0.45); }
+        @media (max-width: 640px) {
+            .page-shell { padding: 18px 16px 34px; }
+            .hero, .form-card { border-radius: 22px; }
+        }
+    </style>
 </head>
-<style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        font-family: 'Segoe UI', Arial, sans-serif;
-    }
-
-    .dashboard {
-        display: flex;
-        flex-wrap: wrap; /* Ensure sidebar and content are responsive */
-    }
-
-    .sidebar {
-        flex: 1;
-        max-width: 240px; /* Maximum width of the sidebar */
-        min-width: 200px; /* Minimum width of the sidebar */
-        background-color: #004d99;
-        color: #fff;
-        height: 100vh;
-        box-sizing: border-box;
-        padding: 20px;
-    }
-
-    .sidebar a {
-        color: #ffffff;
-        text-decoration: none;
-        display: block;
-        padding: 10px 0;
-        margin: 5px 0; /* Spacing between links */
-    }
-
-    .sidebar a:hover {
-        background-color: #003366;
-    }
-
-    .main-content {
-        flex: 3;
-        padding: 20px;
-        background-color: #f7f7f7;
-        overflow-y: auto;
-    }
-
-    /* General form improvements */
-    form {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 500px;
-        margin: 20px auto;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    label {
-        font-size: 16px;
-        color: #333;
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-    }
-
-    input[type="text"], input[type="number"], select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 20px;
-        border: 2px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box; /* Ensures padding does not affect width */
-        transition: border-color 0.3s;
-    }
-
-    input[type="text"]:focus, input[type="number"]:focus, select:focus {
-        border-color: #007bff; /* Highlight focus */
-        outline: none;
-    }
-
-    button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        font-size: 18px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.2s ease-in-out;
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .sidebar {
-            max-width: 100%;
-            height: auto;
-            padding: 15px;
-        }
-
-        .main-content {
-            padding: 15px;
-        }
-
-        form {
-            padding: 20px;
-        }
-    }
-</style>
-
-
 <body>
-<div class="dashboard">
-    <div class="sidebar">
-        <!-- Sidebar content -->
-        <a href="/admin/home">Dashboard</a>
-        <a href="/admin/manageQuizzes">Manage Quizzes</a>
-        <a href="/logout">Logout</a>
-    </div>
-    <div class="main-content">
-        <h1>Create/Edit a Quiz</h1>
+<div class="page-shell">
+    <header class="topbar">
+        <div class="brand">Congnitio<span>sphere</span></div>
+        <nav class="nav-links">
+            <a class="secondary" href="/admin/home">Dashboard</a>
+            <a class="secondary" href="/admin/manageQuizzes">Manage Quizzes</a>
+            <a class="secondary" href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="eyebrow">Quiz builder</div>
+        <h1>Create a new challenge.</h1>
+        <p>Set a strong quiz title, define a clear time limit, and save the quiz before adding questions in the next step.</p>
+    </section>
+
+    <section class="form-card">
         <form th:action="@{/admin/quizzes}" th:object="${quiz}" method="post">
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input type="text" id="title" name="title" th:value="*{title}" required/>
+            <div class="field">
+                <label for="title">Quiz title</label>
+                <input type="text" id="title" name="title" th:value="*{title}" placeholder="Enter a quiz title" required>
             </div>
-            <div class="form-group">
-                <label for="duration">Duration (in minutes):</label>
-                <input type="number" id="duration" name="duration" th:value="*{duration}" min="1" required/>
+            <div class="field">
+                <label for="duration">Duration in minutes</label>
+                <input type="number" id="duration" name="duration" th:value="*{duration}" min="1" placeholder="10" required>
             </div>
-            <div class="form-group">
+            <div>
                 <button type="submit">Save Quiz</button>
             </div>
         </form>
-    </div>
+    </section>
 </div>
 </body>
 </html>

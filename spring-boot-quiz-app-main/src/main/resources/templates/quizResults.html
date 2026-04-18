@@ -1,66 +1,381 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8">
-	<title>Quiz Results</title>
-	<style>
-		body, html {
-			margin: 0;
-			padding: 20px;
-			font-family: 'Segoe UI', Arial, sans-serif;
-			background-color: #f4f4f4;
-			color: #333;
-		}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Results</title>
+    <style>
+        :root {
+            --bg: #f6efe3;
+            --surface: rgba(255, 252, 246, 0.9);
+            --surface-strong: #fffdf8;
+            --ink: #1f2937;
+            --muted: #64748b;
+            --brand: #0f766e;
+            --brand-dark: #134e4a;
+            --accent: #f59e0b;
+            --success: #15803d;
+            --danger: #b91c1c;
+            --success-soft: rgba(21, 128, 61, 0.1);
+            --danger-soft: rgba(185, 28, 28, 0.1);
+            --border: rgba(15, 118, 110, 0.14);
+            --shadow: 0 24px 60px rgba(31, 41, 55, 0.12);
+        }
 
-		h2 {
-			color: #004d99;
-			border-bottom: 2px solid #004d99;
-			padding-bottom: 10px;
-			margin-bottom: 20px;
-		}
+        * {
+            box-sizing: border-box;
+        }
 
-		.question-block {
-			background-color: #ffffff;
-			padding: 15px;
-			margin-bottom: 20px;
-			border-left: 5px solid #004d99;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(245, 158, 11, 0.24), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.22), transparent 22%),
+                linear-gradient(135deg, #f8f4ea 0%, #eef8f6 52%, #f6efe3 100%);
+        }
 
-		.question-block p {
-			margin: 5px 0;
-		}
+        .page-shell {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 24px 24px 48px;
+        }
 
-		.question-block p span {
-			font-weight: bold;
-		}
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
 
-		a {
-			display: inline-block;
-			background-color: #004d99;
-			color: #ffffff;
-			padding: 10px 20px;
-			text-decoration: none;
-			border-radius: 5px;
-			transition: background-color 0.3s ease;
-		}
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--brand-dark);
+        }
 
-		a:hover {
-			background-color: #003366;
-		}
-	</style>
+        .brand span {
+            color: var(--accent);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .actions a {
+            text-decoration: none;
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            transition: transform 0.2s ease;
+        }
+
+        .actions a:hover {
+            transform: translateY(-2px);
+        }
+
+        .actions .primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), #14b8a6);
+            box-shadow: 0 16px 28px rgba(15, 118, 110, 0.22);
+        }
+
+        .actions .secondary {
+            color: var(--brand-dark);
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(15, 118, 110, 0.16);
+        }
+
+        .summary-card,
+        .answer-card,
+        .share-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-card,
+        .share-card {
+            padding: 28px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--brand-dark);
+            font-size: 0.84rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2 {
+            margin: 16px 0 10px;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        .summary-card p,
+        .share-card p,
+        .answer-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.72;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .score-badge {
+            display: inline-grid;
+            place-items: center;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(15, 118, 110, 0.18), rgba(245, 158, 11, 0.22));
+            color: var(--brand-dark);
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .stat-stack {
+            display: grid;
+            gap: 12px;
+        }
+
+        .stat-pill {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.76);
+            border: 1px solid rgba(15, 118, 110, 0.12);
+            color: var(--brand-dark);
+            font-weight: 700;
+        }
+
+        .answer-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .answer-card {
+            padding: 22px;
+        }
+
+        .answer-card.correct {
+            border-color: rgba(21, 128, 61, 0.24);
+        }
+
+        .answer-card.incorrect {
+            border-color: rgba(185, 28, 28, 0.24);
+        }
+
+        .answer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .answer-id {
+            color: var(--brand-dark);
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .status-pill {
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .status-pill.correct {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .status-pill.incorrect {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .answer-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .answer-meta div {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.76);
+            border: 1px solid rgba(15, 118, 110, 0.1);
+        }
+
+        .answer-meta strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--brand-dark);
+        }
+
+        #result-link {
+            margin-top: 14px;
+            word-break: break-all;
+            color: var(--brand-dark);
+            font-weight: 700;
+        }
+
+        #qrcode {
+            margin-top: 16px;
+            padding: 14px;
+            width: fit-content;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 18px;
+            border: 1px solid rgba(15, 118, 110, 0.12);
+        }
+
+        @media (max-width: 900px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-shell {
+                padding: 18px 16px 34px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .answer-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card,
+            .share-card,
+            .answer-card {
+                border-radius: 22px;
+            }
+        }
+    </style>
 </head>
 <body>
-<h2>Your Score: <span th:text="${score}"></span> / <span th:text="${totalQuestions}"></span></h2>
+<div class="page-shell">
+    <header class="topbar">
+        <div class="brand">Congnitio<span>sphere</span></div>
+        <div class="actions">
+            <a class="secondary" href="/user/home">Back to Dashboard</a>
+            <a class="primary" href="/user/home">Take Another Quiz</a>
+        </div>
+    </header>
 
-<div th:each="entry : ${submittedAnswers.entrySet()}">
-	<div class="question-block">
-		<p>Question ID: <span th:text="${entry.key}"></span></p>
-		<p>Your Answer: <span th:text="${entry.value}"></span></p>
-		<p>Correct Answer: <span th:text="${correctAnswers[entry.key]}"></span></p>
-	</div>
+    <section class="summary-grid">
+        <div class="summary-card">
+            <div class="eyebrow">Challenge complete</div>
+            <h1>Your result is ready.</h1>
+            <p>You’ve completed the quiz challenge. Review your score and compare each submitted answer with the correct response below.</p>
+            <div class="score-row">
+                <div class="score-badge">
+                    <span th:text="${score} + '/' + ${totalQuestions}">0/0</span>
+                </div>
+                <div class="stat-stack">
+                    <div class="stat-pill">Correct answers: <span th:text="${score}">0</span></div>
+                    <div class="stat-pill">Total questions: <span th:text="${totalQuestions}">0</span></div>
+                    <div class="stat-pill">Learning mode: Timed Congnitiosphere challenge</div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="share-card">
+            <div class="eyebrow">Share</div>
+            <h2>Save or share your result.</h2>
+            <p>Your current result page link appears below, along with a QR code for quick access on another device.</p>
+            <p id="result-link"></p>
+            <div id="qrcode"></div>
+        </aside>
+    </section>
+
+    <section class="answer-list">
+        <article th:each="entry : ${submittedAnswers.entrySet()}"
+                 th:class="${entry.value == correctAnswers[entry.key]} ? 'answer-card correct' : 'answer-card incorrect'">
+            <div class="answer-header">
+                <div class="answer-id" th:text="'Question ' + ${entry.key}">Question 1</div>
+                <div th:class="${entry.value == correctAnswers[entry.key]} ? 'status-pill correct' : 'status-pill incorrect'"
+                     th:text="${entry.value == correctAnswers[entry.key]} ? 'Correct' : 'Needs review'">Correct</div>
+            </div>
+            <p>Here is the answer comparison for this question.</p>
+            <div class="answer-meta">
+                <div>
+                    <strong>Your answer</strong>
+                    <span th:text="${entry.value}">A</span>
+                </div>
+                <div>
+                    <strong>Correct answer</strong>
+                    <span th:text="${correctAnswers[entry.key]}">B</span>
+                </div>
+            </div>
+        </article>
+    </section>
 </div>
 
-<a href="/user/home">Take another quiz</a>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    (function () {
+        var resultUrl = window.location.href;
+        var resultLink = document.getElementById("result-link");
+        var qrCodeTarget = document.getElementById("qrcode");
+
+        if (!resultLink || !qrCodeTarget || typeof QRCode === "undefined") {
+            return;
+        }
+
+        resultLink.textContent = resultUrl;
+        new QRCode(qrCodeTarget, {
+            text: resultUrl,
+            width: 180,
+            height: 180
+        });
+    })();
+</script>
 </body>
 </html>

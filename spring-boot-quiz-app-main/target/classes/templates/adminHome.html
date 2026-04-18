@@ -2,140 +2,239 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dash</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Admin Dashboard</title>
+    <style>
+        :root {
+            --ink: #1f2937;
+            --muted: #64748b;
+            --brand: #0f766e;
+            --brand-dark: #134e4a;
+            --accent: #f59e0b;
+            --surface: rgba(255, 252, 246, 0.9);
+            --border: rgba(15, 118, 110, 0.14);
+            --shadow: 0 24px 60px rgba(31, 41, 55, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(245, 158, 11, 0.24), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.22), transparent 22%),
+                linear-gradient(135deg, #f8f4ea 0%, #eef8f6 52%, #f6efe3 100%);
+        }
+
+        .page-shell {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 24px 24px 48px;
+        }
+
+        .topbar, .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .topbar { margin-bottom: 22px; }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--brand-dark);
+        }
+
+        .brand span { color: var(--accent); }
+
+        .nav-links, .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a, .actions a {
+            text-decoration: none;
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-links a:hover, .actions a:hover { transform: translateY(-2px); }
+
+        .primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), #14b8a6);
+            box-shadow: 0 16px 28px rgba(15, 118, 110, 0.22);
+        }
+
+        .secondary {
+            color: var(--brand-dark);
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(15, 118, 110, 0.16);
+        }
+
+        .hero, .quiz-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero {
+            padding: 30px;
+            margin-bottom: 22px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--brand-dark);
+            font-size: 0.84rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1, h2 {
+            margin: 16px 0 10px;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+        h2 { font-size: 1.4rem; }
+
+        p { margin: 0; color: var(--muted); line-height: 1.72; }
+
+        .stat-grid, .quiz-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .stat-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 22px;
+        }
+
+        .stat-card {
+            padding: 18px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(15, 118, 110, 0.1);
+        }
+
+        .stat-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--brand-dark);
+            font-size: 1.8rem;
+        }
+
+        .quiz-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .quiz-card { padding: 24px; }
+
+        .quiz-meta {
+            margin: 12px 0 16px;
+            color: var(--brand-dark);
+            font-weight: 700;
+        }
+
+        .empty-state {
+            padding: 28px;
+            border-radius: 24px;
+            background: var(--surface);
+            border: 1px dashed rgba(15, 118, 110, 0.24);
+            color: var(--muted);
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .stat-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .page-shell { padding: 18px 16px 34px; }
+            .hero, .quiz-card { border-radius: 22px; }
+        }
+    </style>
 </head>
-<style>
-    body {
-        display: flex;
-        margin: 0;
-        height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow: hidden; /* Prevent scrolling on the body directly */
-    }
-
-    .sidebar {
-        background-color: #004d99;
-        color: #ffffff;
-        padding: 20px;
-        width: 200px;
-        display: flex;
-        flex-direction: column;
-        justify-content: start;
-    }
-
-    .sidebar a {
-        color: #ffffff;
-        text-decoration: none;
-        padding: 10px 0;
-        margin: 5px 0; /* Spacing between links */
-    }
-
-    .sidebar a:hover {
-        background-color: #003366;
-    }
-
-    /* Correctly position the main content */
-    .content {
-        flex-grow: 1;
-        padding: 20px;
-        overflow-y: auto; /* Ensure content area is scrollable */
-        background-color: #f7f7f7;
-    }
-
-    /* Style adjustments */
-    h1, h2 {
-        color: #333;
-    }
-
-    ul, li {
-        list-style: none;
-        padding: 0;
-    }
-
-    a:not(.sidebar a) { /* Specificity for links outside the sidebar */
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    a:not(.sidebar a):hover {
-        text-decoration: underline;
-    }
-
-    /* Enhancements for quiz list items */
-    ul {
-        margin-top: 20px;
-    }
-
-    li {
-        background-color: #fff;
-        margin-bottom: 10px;
-        padding: 10px;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    /* Adjust link and action alignment */
-    li a {
-        margin-right: 15px;
-    }
-
-    .deleteQuiz {
-        color: #dc3545;
-    }
-</style>
-
-
 <body>
-<div class="sidebar">
-    <a href="/admin/home">Dashboard</a>
-    <a href="/admin/manageQuizzes">Manage Quizzes</a>
-    <a href="/logout">Logout</a>
+<div class="page-shell">
+    <header class="topbar">
+        <div class="brand">Congnitio<span>sphere</span></div>
+        <nav class="nav-links">
+            <a class="secondary" href="/admin/manageQuizzes">Manage Quizzes</a>
+            <a class="secondary" href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="eyebrow">Admin command center</div>
+        <h1>Build and manage quiz experiences.</h1>
+        <p>Create new quiz journeys, update durations, add questions, and keep the Congnitiosphere library organized from one cleaner dashboard.</p>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <strong th:text="${quizzes != null ? #lists.size(quizzes) : 0}">0</strong>
+                <span>Total quizzes available</span>
+            </div>
+            <div class="stat-card">
+                <strong th:text="${quizzes != null ? #aggregates.sum(quizzes.![questions.size()]) : 0}">0</strong>
+                <span>Total questions across quizzes</span>
+            </div>
+            <div class="stat-card">
+                <strong>Admin</strong>
+                <span>Focused editing tools for live quiz content</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-header" style="margin-bottom: 18px;">
+            <div>
+                <div class="eyebrow">Quiz library</div>
+                <h2>Current quizzes</h2>
+            </div>
+            <div class="actions">
+                <a class="primary" href="/admin/quizzes/new">Create New Quiz</a>
+            </div>
+        </div>
+
+        <div class="quiz-grid" th:if="${quizzes != null and !#lists.isEmpty(quizzes)}">
+            <article class="quiz-card" th:each="quiz : ${quizzes}">
+                <h2 th:text="${quiz.title}">Quiz Title</h2>
+                <p>Manage quiz timing, refresh questions, and keep the challenge ready for learners.</p>
+                <div class="quiz-meta">
+                    <span th:text="'Duration: ' + ${quiz.duration} + ' minutes'">Duration: 10 minutes</span>
+                    <span th:text="' | Questions: ' + ${quiz.questions != null ? quiz.questions.size() : 0}"> | Questions: 0</span>
+                </div>
+                <div class="actions">
+                    <a class="secondary" th:href="@{/admin/quizzes/{id}(id=${quiz.id})}">Edit Quiz</a>
+                    <a class="secondary" th:href="@{/admin/quizzes/{quizId}/questions/new(quizId=${quiz.id})}">Add Questions</a>
+                    <a class="primary" th:href="@{/admin/manageQuizzes}">View Details</a>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${quizzes == null or #lists.isEmpty(quizzes)}">
+            No quizzes exist yet. Create your first quiz to start building the Congnitiosphere challenge library.
+        </div>
+    </section>
 </div>
-<div class="content">
-    <h1>Admin Dashboard</h1>
-
-    <div>
-        <h2>Quizzes</h2>
-        <a th:href="@{/admin/quizzes/new}">Create New Quiz</a>
-        <ul>
-            <li th:each="quiz : ${quizzes}">
-                <span th:text="${quiz.title}">Quiz Title</span>
-                <a th:href="@{/admin/quizzes/{id}/edit(id=${quiz.id})}">Edit</a> |
-                <a th:href="@{/admin/quizzes/{id}/questions(new}(id=${quiz.id})}">Add Questions</a> |
-                <a th:href="@{/admin/quizzes/{id}(id=${quiz.id})}" th:attr="data-quiz-id=${quiz.id}" class="deleteQuiz">Delete</a>
-            </li>
-        </ul>
-    </div>
-</div>
-</body>
-
-
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    document.addEventListener('DOMContentLoaded', function () {
-        const deleteLinks = document.querySelectorAll('.deleteQuiz');
-        deleteLinks.forEach(link => {
-            link.addEventListener('click', function (event) {
-                event.preventDefault();
-                const quizId = this.getAttribute('data-quiz-id');
-                if (confirm('Are you sure you want to delete this quiz?')) {
-                    fetch('/admin/quizzes/' + quizId, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    }).then(response => {
-                        if (response.ok) {
-                            window.location.reload();
-                        } else {
-                            alert('Failed to delete quiz.');
-                        }
-                    });
-                }
-            });
-        });
-    });
-    /*]]>*/
-</script>
 </body>
 </html>

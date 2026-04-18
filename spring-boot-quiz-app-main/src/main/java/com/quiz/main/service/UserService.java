@@ -4,6 +4,7 @@ import com.quiz.main.model.User;
 import com.quiz.main.model.UserDto;
 import com.quiz.main.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,12 +17,32 @@ public class UserService {
     private UserRepository userRepository;
 
     public User registerNewUser(UserDto userDto) {
+        String username = userDto.getUsername() != null ? userDto.getUsername().trim() : "";
+        String email = userDto.getEmail() != null ? userDto.getEmail().trim() : "";
+
+        if (username.isEmpty() || email.isEmpty() || userDto.getPassword() == null || userDto.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("All fields are required.");
+        }
+
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("That username is already taken. Please choose another one.");
+        }
+
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("That email is already registered. Try logging in instead.");
+        }
+
         User newUser = new User();
-        newUser.setUsername(userDto.getUsername());
+        newUser.setUsername(username);
         newUser.setPassword(userDto.getPassword()); // Storing password as-is, without encoding
-        newUser.setEmail(userDto.getEmail());
+        newUser.setEmail(email);
         newUser.setRole("ROLE_USER"); // Assign the default role directly as a string
-        return userRepository.save(newUser);
+
+        try {
+            return userRepository.save(newUser);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException("That username or email is already registered.");
+        }
     }
 
     public User getAuthenticatedUser() {

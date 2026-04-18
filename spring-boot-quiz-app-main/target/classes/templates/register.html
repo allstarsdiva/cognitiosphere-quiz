@@ -2,111 +2,266 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Register</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
+        :root {
+            --bg: #f6efe3;
+            --surface: rgba(255, 252, 246, 0.88);
+            --surface-strong: #fffdf8;
+            --ink: #1f2937;
+            --muted: #64748b;
+            --brand: #0f766e;
+            --brand-dark: #134e4a;
+            --accent: #f59e0b;
+            --border: rgba(15, 118, 110, 0.14);
+            --shadow: 0 24px 60px rgba(31, 41, 55, 0.14);
         }
 
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: calc(100% - 40px);
-            max-width: 400px;
+        * {
             box-sizing: border-box;
         }
 
-        h1 {
-            color: #004d99;
-            margin-bottom: 20px;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top right, rgba(245, 158, 11, 0.24), transparent 24%),
+                radial-gradient(circle at bottom left, rgba(15, 118, 110, 0.24), transparent 22%),
+                linear-gradient(135deg, #f8f4ea 0%, #eef8f6 52%, #f6efe3 100%);
+        }
+
+        .auth-layout {
+            width: min(1080px, 100%);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-radius: 32px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+
+        .auth-main,
+        .auth-aside {
+            padding: 40px;
+        }
+
+        .auth-main {
+            background: rgba(255, 253, 248, 0.86);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--brand-dark);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .panel-label {
+            margin: 28px 0 8px;
+            color: var(--brand-dark);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .auth-main h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 5vw, 3rem);
+        }
+
+        .subcopy {
+            margin: 0 0 26px;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .error-message {
+            margin: 0 0 18px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(185, 28, 28, 0.08);
+            color: #b91c1c;
+            font-weight: 700;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
         }
 
         label {
-            display: block;
-            margin-top: 20px;
-            text-align: left;
+            font-weight: 700;
+            color: var(--brand-dark);
         }
 
         input[type="text"],
         input[type="email"],
         input[type="password"] {
             width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
+            border: 1px solid rgba(15, 118, 110, 0.18);
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            background: #fff;
+            color: var(--ink);
+        }
+
+        input:focus {
+            outline: 2px solid rgba(20, 184, 166, 0.24);
+            border-color: rgba(15, 118, 110, 0.45);
         }
 
         button {
-            background-color: #004d99;
-            color: white;
-            padding: 10px 20px;
+            margin-top: 6px;
             border: none;
-            border-radius: 5px;
+            border-radius: 999px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 800;
             cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            margin-top: 20px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), #14b8a6);
+            box-shadow: 0 16px 28px rgba(15, 118, 110, 0.24);
+            transition: transform 0.2s ease;
         }
 
         button:hover {
-            background-color: #003366;
+            transform: translateY(-2px);
         }
 
         .account-action {
-            margin-top: 20px;
+            margin-top: 18px;
+            color: var(--muted);
         }
 
         .account-action a {
-            color: #004d99;
+            color: var(--brand);
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 700;
         }
 
-        @media (max-width: 768px) {
-            body, html {
-                height: auto;
-                min-height: 100vh;
-                padding: 20px;
+        .auth-aside {
+            background: linear-gradient(165deg, rgba(19, 78, 74, 0.95), rgba(15, 118, 110, 0.94));
+            color: #ecfeff;
+            display: grid;
+            gap: 20px;
+            align-content: center;
+        }
+
+        .auth-aside h2 {
+            margin: 0;
+            font-size: clamp(2rem, 5vw, 3.1rem);
+            line-height: 1;
+        }
+
+        .auth-aside p {
+            margin: 0;
+            color: rgba(236, 254, 255, 0.84);
+            line-height: 1.75;
+        }
+
+        .benefits {
+            display: grid;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .benefit {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 16px;
+        }
+
+        .benefit strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #fde68a;
+        }
+
+        @media (max-width: 900px) {
+            .auth-layout {
+                grid-template-columns: 1fr;
             }
 
-            form {
-                width: 100%;
-                padding: 15px;
-                box-sizing: border-box;
+            .auth-main,
+            .auth-aside {
+                padding: 28px 22px;
             }
         }
     </style>
 </head>
 <body>
-<h1>Registration</h1>
-<form th:action="@{/register}" th:object="${user}" method="post">
-    <label for="username">Username:</label>
-    <input type="text" id="username" th:field="*{username}" required />
+<div class="auth-layout">
+    <section class="auth-main">
+        <div class="logo">Congnitio<span>sphere</span></div>
+        <p class="panel-label">Create account</p>
+        <h1>Join the Congnitiosphere.</h1>
+        <p class="subcopy">Build your account and step into a cleaner, more inviting quiz experience built around curiosity and progress.</p>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" th:field="*{email}" required />
+        <p class="error-message" th:if="${error}" th:text="${error}"></p>
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" th:field="*{password}" required />
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            <div class="field">
+                <label for="username">Username</label>
+                <input type="text" id="username" th:field="*{username}" placeholder="Choose a username" required>
+            </div>
 
-    <button type="submit">Register</button>
+            <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" th:field="*{email}" placeholder="Enter your email" required>
+            </div>
 
-    <div class="account-action">
-        <p>Already have an account? <a href="/login">Login here</a></p>
-    </div>
-</form>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" th:field="*{password}" placeholder="Create a password" required>
+            </div>
+
+            <button type="submit">Create My Account</button>
+
+            <div class="account-action">
+                Already have an account? <a href="/login">Login here</a>
+            </div>
+        </form>
+    </section>
+
+    <aside class="auth-aside">
+        <h2>Start your next learning streak with style.</h2>
+        <p>Congnitiosphere is built to feel more alive than a standard form-first quiz demo. Sign up once, then move straight into challenges that keep your attention where it belongs.</p>
+        <div class="benefits">
+            <div class="benefit">
+                <strong>Quick setup</strong>
+                Your account is ready in moments so you can begin exploring quizzes without friction.
+            </div>
+            <div class="benefit">
+                <strong>Clearer journey</strong>
+                The interface now guides users toward the next meaningful action instead of leaving them guessing.
+            </div>
+            <div class="benefit">
+                <strong>Brand-ready feel</strong>
+                The visual language now matches the name Congnitiosphere instead of a generic quiz template.
+            </div>
+        </div>
+    </aside>
+</div>
 </body>
 </html>

@@ -1,18 +1,50 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Quizzes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Quiz Library</title>
+    <style>
+        :root { --ink:#1f2937; --muted:#64748b; --brand:#0f766e; --brand-dark:#134e4a; --accent:#f59e0b; --surface:rgba(255,252,246,0.9); --border:rgba(15,118,110,0.14); --shadow:0 24px 60px rgba(31,41,55,0.12);}
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; font-family:"Trebuchet MS","Segoe UI",sans-serif; color:var(--ink); background:radial-gradient(circle at top left, rgba(245,158,11,0.24), transparent 24%),radial-gradient(circle at bottom right, rgba(15,118,110,0.22), transparent 22%),linear-gradient(135deg,#f8f4ea 0%,#eef8f6 52%,#f6efe3 100%); }
+        .page-shell { max-width:1100px; margin:0 auto; padding:24px; }
+        .hero,.quiz-card,.empty-state { background:var(--surface); border:1px solid var(--border); border-radius:28px; box-shadow:var(--shadow); backdrop-filter:blur(10px); }
+        .hero,.empty-state { padding:28px; }
+        .hero { margin-bottom:22px; }
+        .brand { font-size:1.45rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; color:var(--brand-dark); margin-bottom:16px; }
+        .brand span { color:var(--accent); }
+        .eyebrow { display:inline-flex; padding:8px 14px; border-radius:999px; background:rgba(15,118,110,0.1); color:var(--brand-dark); font-size:0.84rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
+        h1,h2 { margin:16px 0 10px; line-height:1; letter-spacing:-0.04em; }
+        h1 { font-size:clamp(2rem,5vw,3.2rem); }
+        h2 { font-size:1.35rem; }
+        p { margin:0; color:var(--muted); line-height:1.72; }
+        .quiz-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
+        .quiz-card { padding:24px; }
+        .actions { margin-top:16px; }
+        .actions a { display:inline-block; text-decoration:none; padding:12px 18px; border-radius:999px; font-weight:800; color:#fff; background:linear-gradient(135deg,var(--brand),#14b8a6); box-shadow:0 16px 28px rgba(15,118,110,0.22); }
+    </style>
 </head>
 <body>
-<h2>Available Quizzes</h2>
-<div th:if="${not #lists.isEmpty(quizzes)}">
-    <ul>
-        <li th:each="quiz : ${quizzes}" th:text="${quiz.title}">Quiz Title</li>
-    </ul>
+<div class="page-shell">
+    <section class="hero">
+        <div class="brand">Congnitio<span>sphere</span></div>
+        <div class="eyebrow">Quiz library</div>
+        <h1>Available quizzes</h1>
+        <p>Browse the available challenges below. This supporting library screen now matches the rest of the Congnitiosphere experience.</p>
+    </section>
+    <section class="quiz-grid" th:if="${not #lists.isEmpty(quizzes)}">
+        <article class="quiz-card" th:each="quiz : ${quizzes}">
+            <h2 th:text="${quiz.title}">Quiz Title</h2>
+            <p th:text="${quiz.duration != null ? 'Duration: ' + quiz.duration + ' minutes' : 'Ready to start.'}">Duration</p>
+            <div class="actions">
+                <a th:href="@{/quizzes/{id}(id=${quiz.id})}">Open Quiz</a>
+            </div>
+        </article>
+    </section>
+    <div class="empty-state" th:if="${#lists.isEmpty(quizzes)}">
+        No quizzes are available right now.
+    </div>
 </div>
-<div th:if="${#lists.isEmpty(quizzes)}">
-    <p>No quizzes available.</p>
-</div>
-<a href="/admin/quizzes/new">Create New Quiz</a>
 </body>
 </html>

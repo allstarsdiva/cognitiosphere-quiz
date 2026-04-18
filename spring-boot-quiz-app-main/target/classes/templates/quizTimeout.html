@@ -2,11 +2,90 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quiz Timeout</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Time Expired</title>
+    <style>
+        :root {
+            --ink: #1f2937;
+            --muted: #64748b;
+            --brand: #0f766e;
+            --brand-dark: #134e4a;
+            --accent: #f59e0b;
+            --danger: #b91c1c;
+            --shadow: 0 24px 60px rgba(31, 41, 55, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(245, 158, 11, 0.24), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.22), transparent 22%),
+                linear-gradient(135deg, #f8f4ea 0%, #eef8f6 52%, #f6efe3 100%);
+        }
+
+        .timeout-card {
+            width: min(620px, 100%);
+            padding: 34px;
+            border-radius: 32px;
+            background: rgba(255, 252, 246, 0.9);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .brand {
+            margin-bottom: 18px;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--brand-dark);
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--danger);
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 24px;
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 999px;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), #14b8a6);
+            box-shadow: 0 16px 28px rgba(15, 118, 110, 0.22);
+        }
+    </style>
 </head>
 <body>
-<h2>Quiz Timeout</h2>
-<p>The time allocated for the quiz has expired.</p>
-<a th:href="@{/user/home}">Return to Home</a>
+<section class="timeout-card">
+    <div class="brand">Congnitio<span>sphere</span></div>
+    <h1>Time expired</h1>
+    <p>The quiz timer ran out before submission finished. Return to your dashboard to choose another challenge and continue learning.</p>
+    <a th:href="@{/user/home}">Return to Dashboard</a>
+</section>
 </body>
 </html>

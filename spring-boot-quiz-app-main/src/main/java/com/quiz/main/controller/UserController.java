@@ -23,10 +23,22 @@ public class UserController {
         return "register";
     }
 
+    @GetMapping("/signup")
+    public String showSignupForm(Model model) {
+        model.addAttribute("user", new UserDto());
+        return "register";
+    }
+
     @PostMapping("/register")
-    public String processRegistration(@ModelAttribute("userDto") UserDto userDto) {
-        userService.registerNewUser(userDto); // Adjusted to call registerNewUser
-        return "redirect:/login";
+    public String processRegistration(@ModelAttribute("user") UserDto userDto, Model model) {
+        try {
+            userService.registerNewUser(userDto);
+            return "redirect:/login";
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("user", userDto);
+            model.addAttribute("error", ex.getMessage());
+            return "register";
+        }
     }
 
 

@@ -2,181 +2,402 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Take Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Quiz Challenge</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
+        :root {
+            --bg: #f6efe3;
+            --surface: rgba(255, 252, 246, 0.9);
+            --surface-strong: #fffdf8;
+            --ink: #1f2937;
+            --muted: #64748b;
+            --brand: #0f766e;
+            --brand-dark: #134e4a;
+            --accent: #f59e0b;
+            --danger: #b91c1c;
+            --danger-soft: rgba(185, 28, 28, 0.1);
+            --border: rgba(15, 118, 110, 0.14);
+            --shadow: 0 24px 60px rgba(31, 41, 55, 0.12);
         }
 
-        .container {
-            display: flex;
-        }
-
-        .sidebar {
-            background-color: #004d99;
-            color: #fff;
-            padding: 20px;
-            width: 200px;
-            height: 100vh;
+        * {
             box-sizing: border-box;
         }
 
-        .sidebar a {
-            color: #ffffff;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(245, 158, 11, 0.24), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.22), transparent 22%),
+                linear-gradient(135deg, #f8f4ea 0%, #eef8f6 52%, #f6efe3 100%);
+        }
+
+        .page-shell {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 24px 24px 48px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--brand-dark);
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a,
+        .submit-button {
             text-decoration: none;
-            display: block;
-            padding: 10px 0;
+            border: none;
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
 
-        .sidebar a:hover {
-            background-color: #003366;
+        .nav-links a:hover,
+        .submit-button:hover {
+            transform: translateY(-2px);
         }
 
-        .content {
-            flex-grow: 1;
-            padding: 20px;
+        .nav-links .secondary {
+            color: var(--brand-dark);
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(15, 118, 110, 0.16);
+        }
+
+        .nav-links .primary,
+        .submit-button {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), #14b8a6);
+            box-shadow: 0 16px 28px rgba(15, 118, 110, 0.22);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .hero-card,
+        .status-card,
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-card,
+        .status-card {
+            padding: 28px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--brand-dark);
+            font-size: 0.84rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         h1 {
-            color: #004d99;
-            margin-bottom: 20px;
+            margin: 16px 0 10px;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            line-height: 1;
+            letter-spacing: -0.04em;
         }
 
-        form {
+        .hero-card p,
+        .status-card p,
+        .question-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.72;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .meta-card {
+            padding: 18px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(15, 118, 110, 0.1);
+        }
+
+        .meta-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--brand-dark);
+        }
+
+        .timer-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: var(--danger-soft);
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .question-list {
+            display: grid;
+            gap: 18px;
+        }
+
+        .question-card {
+            padding: 22px;
+        }
+
+        .question-number {
+            display: inline-flex;
+            margin-bottom: 10px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--brand-dark);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .question-title {
+            margin: 0 0 16px;
+            color: var(--ink);
+            font-size: 1.18rem;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .option-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(15, 118, 110, 0.12);
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+        }
+
+        .option:hover {
+            transform: translateY(-1px);
+            border-color: rgba(15, 118, 110, 0.28);
             background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .question {
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #e9e9e9;
-            border-radius: 5px;
-        }
-
-        .question p {
-            margin: 0 0 10px 0;
-            font-weight: bold;
-        }
-
-        .question div {
-            margin: 5px 0;
+        .option-letter {
+            display: inline-grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(15, 118, 110, 0.12);
+            color: var(--brand-dark);
+            font-weight: 800;
         }
 
         input[type="radio"] {
-            margin-right: 5px;
+            accent-color: var(--brand);
+            transform: scale(1.1);
         }
 
-        button {
-            background-color: #004d99;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            display: inline-block;
-            margin-top: 20px;
+        .submit-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
         }
 
-        button:hover {
-            background-color: #003366;
+        @media (max-width: 920px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        #countdown {
-            font-weight: bold;
-            color: #d9534f;
-            margin-top: 20px;
-        }
+        @media (max-width: 640px) {
+            .page-shell {
+                padding: 18px 16px 34px;
+            }
 
-        @media (max-width: 768px) {
-            .container {
+            .topbar {
                 flex-direction: column;
+                align-items: flex-start;
             }
 
-            .sidebar {
+            .question-card,
+            .hero-card,
+            .status-card {
+                border-radius: 22px;
+            }
+
+            .submit-row {
+                justify-content: stretch;
+            }
+
+            .submit-button {
                 width: 100%;
-                height: auto;
-            }
-
-            .content {
-                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="sidebar">
-        <a href="/user/home">Back</a>
-        <a href="/logout">Logout</a>
-    </div>
-    <div class="content">
-        <h1 th:text="${quiz.title}">Quiz Title</h1>
-        <form th:action="@{/quizzes/{quizId}/submit(quizId=${quiz.id})}" th:object="${quizSubmission}" method="post" id="quizForm">
-            <div th:each="question : ${questions}" class="question">
-                <p th:text="${question.text}">Question Text</p>
-                <div>
-                    <input type="radio" th:field="*{answers[__${question.id}__]}" th:value="'A'" />
-                    <label th:text="${question.optionA}">Option A</label>
+<div class="page-shell">
+    <header class="topbar">
+        <div class="brand">Congnitio<span>sphere</span></div>
+        <nav class="nav-links">
+            <a class="secondary" href="/user/home">Back to Dashboard</a>
+            <a class="secondary" href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-card">
+            <div class="eyebrow">Live challenge</div>
+            <h1 th:text="${quiz.title}">Quiz Title</h1>
+            <p>Stay focused, choose carefully, and submit before the countdown reaches zero. Congnitiosphere will auto-submit your answers when time expires.</p>
+            <div class="meta-grid">
+                <div class="meta-card">
+                    <strong>Questions</strong>
+                    <span th:text="${#lists.size(questions)}">0</span>
                 </div>
-                <div>
-                    <input type="radio" th:field="*{answers[__${question.id}__]}" th:value="'B'" />
-                    <label th:text="${question.optionB}">Option B</label>
+                <div class="meta-card">
+                    <strong>Duration</strong>
+                    <span th:text="${duration} + ' minutes'">0 minutes</span>
                 </div>
-                <div>
-                    <input type="radio" th:field="*{answers[__${question.id}__]}" th:value="'C'" />
-                    <label th:text="${question.optionC}">Option C</label>
+                <div class="meta-card">
+                    <strong>Mode</strong>
+                    <span>Timed challenge</span>
                 </div>
             </div>
-            <button type="submit">Submit</button>
-        </form>
-        <div id="countdown">Loading timer...</div>
-    </div>
+        </div>
+
+        <aside class="status-card">
+            <div class="eyebrow">Countdown</div>
+            <h2>Keep your momentum.</h2>
+            <p>Review each question, select one answer, and submit whenever you are ready. The timer below updates every second.</p>
+            <div class="timer-pill" id="countdown">Loading timer...</div>
+        </aside>
+    </section>
+
+    <form th:action="@{/quizzes/{quizId}/submit(quizId=${quiz.id})}" th:object="${quizSubmission}" method="post" id="quizForm">
+        <div class="question-list">
+            <section th:each="question, stat : ${questions}" class="question-card">
+                <div class="question-number" th:text="'Question ' + ${stat.count}">Question 1</div>
+                <p class="question-title" th:text="${question.text}">Question Text</p>
+                <div class="option-list">
+                    <label class="option">
+                        <input type="radio" th:field="*{answers[__${question.id}__]}" th:value="'A'">
+                        <span class="option-letter">A</span>
+                        <span th:text="${question.optionA}">Option A</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" th:field="*{answers[__${question.id}__]}" th:value="'B'">
+                        <span class="option-letter">B</span>
+                        <span th:text="${question.optionB}">Option B</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" th:field="*{answers[__${question.id}__]}" th:value="'C'">
+                        <span class="option-letter">C</span>
+                        <span th:text="${question.optionC}">Option C</span>
+                    </label>
+                </div>
+            </section>
+        </div>
+
+        <div class="submit-row">
+            <button class="submit-button" type="submit">Submit Challenge</button>
+        </div>
+    </form>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const durationInput = document.getElementById('quizDuration');
-        if (!durationInput) {
-            console.error("Quiz duration input not found");
+    document.addEventListener("DOMContentLoaded", function () {
+        const durationInput = document.getElementById("quizDuration");
+        const countdownElement = document.getElementById("countdown");
+        const quizForm = document.getElementById("quizForm");
+
+        if (!durationInput || !countdownElement || !quizForm) {
             return;
         }
 
         const duration = parseInt(durationInput.value, 10);
-        console.log("Quiz duration in minutes:", duration);
-
-        if (isNaN(duration)) {
-            console.error("Invalid quiz duration value");
+        if (Number.isNaN(duration)) {
+            countdownElement.textContent = "Timer unavailable";
             return;
         }
 
-        const endTime = new Date(new Date().getTime() + duration * 60000);
-        console.log("Quiz end time:", endTime);
+        const endTime = Date.now() + duration * 60000;
 
-        const interval = setInterval(() => {
-            const now = new Date();
-            const distance = endTime - now;
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        function updateCountdown() {
+            const distance = endTime - Date.now();
 
-            document.getElementById("countdown").innerHTML = `${minutes}m ${seconds}s`;
-
-            if (distance < 0) {
+            if (distance <= 0) {
+                countdownElement.textContent = "Time up. Submitting now...";
                 clearInterval(interval);
-                document.getElementById("countdown").innerHTML = "TIME UP";
-                document.getElementById("quizForm").submit();
+                quizForm.submit();
+                return;
             }
-        }, 1000);
+
+            const totalSeconds = Math.floor(distance / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            countdownElement.textContent = minutes + "m " + String(seconds).padStart(2, "0") + "s remaining";
+        }
+
+        updateCountdown();
+        const interval = setInterval(updateCountdown, 1000);
     });
 </script>
 
-<input type="hidden" id="quizDuration" th:value="${duration}" />
+<input type="hidden" id="quizDuration" th:value="${duration}">
 </body>
 </html>

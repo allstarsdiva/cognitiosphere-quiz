@@ -1,22 +1,38 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Create/Edit Quiz</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congnitiosphere | Quiz Form</title>
+    <style>
+        :root { --ink:#1f2937; --muted:#64748b; --brand:#0f766e; --brand-dark:#134e4a; --accent:#f59e0b; --surface:rgba(255,252,246,0.9); --border:rgba(15,118,110,0.14); --shadow:0 24px 60px rgba(31,41,55,0.12);}
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; font-family:"Trebuchet MS","Segoe UI",sans-serif; color:var(--ink); background:radial-gradient(circle at top left, rgba(245,158,11,0.24), transparent 24%),radial-gradient(circle at bottom right, rgba(15,118,110,0.22), transparent 22%),linear-gradient(135deg,#f8f4ea 0%,#eef8f6 52%,#f6efe3 100%); }
+        .page-shell { max-width:920px; margin:0 auto; padding:24px; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:28px; box-shadow:var(--shadow); backdrop-filter:blur(10px); padding:28px; }
+        .brand { margin-bottom:16px; font-size:1.45rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; color:var(--brand-dark); }
+        .brand span { color:var(--accent); }
+        .eyebrow { display:inline-flex; padding:8px 14px; border-radius:999px; background:rgba(15,118,110,0.1); color:var(--brand-dark); font-size:0.84rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
+        h1 { margin:16px 0 10px; font-size:clamp(2rem,5vw,3rem); line-height:1; letter-spacing:-0.04em; }
+        p { margin:0; color:var(--muted); line-height:1.72; }
+        .actions { margin-top:22px; display:flex; gap:12px; flex-wrap:wrap; }
+        .actions a { text-decoration:none; padding:12px 18px; border-radius:999px; font-weight:800; }
+        .primary { color:#fff; background:linear-gradient(135deg,var(--brand),#14b8a6); box-shadow:0 16px 28px rgba(15,118,110,0.22); }
+        .secondary { color:var(--brand-dark); background:rgba(255,255,255,0.74); border:1px solid rgba(15,118,110,0.16); }
+    </style>
 </head>
 <body>
-<h2>Create/Edit Quiz</h2>
-<form th:action="@{/admin/quizzes}" th:object="${quiz}" method="post">
-    <div>
-        <label for="title">Title:</label>
-        <input type="text" id="title" th:field="*{title}" />
-    </div>
-    <div>
-        <label for="duration">Duration (in minutes):</label>
-        <input type="number" id="duration" th:field="*{duration}" />
-    </div>
-    <div>
-        <button type="submit">Save Quiz</button>
-    </div>
-</form>
+<div class="page-shell">
+    <section class="card">
+        <div class="brand">Congnitio<span>sphere</span></div>
+        <div class="eyebrow">Quiz builder helper</div>
+        <h1>Quiz form ready.</h1>
+        <p>This route is prepared as a supporting quiz form screen. The main admin creation flow now lives in the redesigned admin pages, but this template is polished so it still feels consistent if referenced.</p>
+        <div class="actions">
+            <a class="primary" href="/admin/quizzes/new">Create a Quiz</a>
+            <a class="secondary" href="/admin/manageQuizzes">Manage Quizzes</a>
+        </div>
+    </section>
+</div>
 </body>
 </html>
