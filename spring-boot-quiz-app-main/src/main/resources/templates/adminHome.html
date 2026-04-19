@@ -190,11 +190,11 @@
         <p>Create new quiz journeys, update durations, add questions, and keep the Congnitiosphere library organized from one cleaner dashboard.</p>
         <div class="stat-grid">
             <div class="stat-card">
-                <strong th:text="${quizzes != null ? #lists.size(quizzes) : 0}">0</strong>
+                <strong th:text="${quizCount}">0</strong>
                 <span>Total quizzes available</span>
             </div>
             <div class="stat-card">
-                <strong th:text="${quizzes != null ? #aggregates.sum(quizzes.![questions.size()]) : 0}">0</strong>
+                <strong th:text="${questionCount}">0</strong>
                 <span>Total questions across quizzes</span>
             </div>
             <div class="stat-card">

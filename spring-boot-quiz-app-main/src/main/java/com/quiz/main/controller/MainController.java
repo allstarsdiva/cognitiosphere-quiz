@@ -51,6 +51,13 @@ public class MainController {
 		ModelAndView modelAndView = new ModelAndView();
 		User currentUser = (User) session.getAttribute("currentUser");
 		if (currentUser != null && "ROLE_ADMIN".equals(currentUser.getRole())) {
+			List<Quiz> quizzes = quizService.getAllQuizzes();
+			int totalQuestions = quizzes.stream()
+					.mapToInt(quiz -> quiz.getQuestions() == null ? 0 : quiz.getQuestions().size())
+					.sum();
+			modelAndView.addObject("quizzes", quizzes);
+			modelAndView.addObject("quizCount", quizzes.size());
+			modelAndView.addObject("questionCount", totalQuestions);
 			modelAndView.setViewName("adminHome");
 		} else {
 			modelAndView.setViewName("redirect:/login"); // Redirect to login if not admin
