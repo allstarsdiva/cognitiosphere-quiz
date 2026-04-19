@@ -1,18 +1,26 @@
 package com.quiz.main.controller;
 
-import com.quiz.main.model.Question;
 import com.quiz.main.model.Quiz;
+import com.quiz.main.model.QuizResult;
 import com.quiz.main.model.QuizSubmission;
 import com.quiz.main.model.User;
 import com.quiz.main.service.QuizService;
-import com.quiz.main.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
 @RequestMapping("/quizzes")
@@ -21,9 +29,11 @@ public class UserQuizController {
     @Autowired
     private QuizService quizService;
 
-    // Assuming you have a UserService to get the currently authenticated user
-    @Autowired
-    private UserService userService;
+    @Value("${app.public-base-url:}")
+    private String publicBaseUrl;
+
+    @Value("${RAILWAY_PUBLIC_DOMAIN:}")
+    private String railwayPublicDomain;
 
     @GetMapping
     public String listQuizzes(Model model) {
@@ -33,7 +43,7 @@ public class UserQuizController {
 
     @GetMapping("/{id}")
     public String takeQuiz(@PathVariable Long id, Model model, HttpSession session) {
-        Quiz quiz = quizService.getQuizById(id);
+        Quiz quiz = quizService.getQuizWithQuestionsById(id);
         if (quiz == null) {
             return "redirect:/quiz-not-found"; // or handle the error appropriately
         }
@@ -52,45 +62,90 @@ public class UserQuizController {
     }
 
     @PostMapping("/{quizId}/submit")
-    public String submitQuizAnswers(@PathVariable Long quizId, @ModelAttribute QuizSubmission submission, Model model, HttpSession session) {
-        // Evaluate the submission to calculate the score
+    public String submitQuizAnswers(@PathVariable Long quizId, @ModelAttribute QuizSubmission submission, HttpSession session) {
         User currentUser = (User) session.getAttribute("currentUser");
         if (currentUser == null) {
-            // No user in session, redirect to login or handle accordingly
             return "redirect:/login";
         }
-        int score = evaluateSubmission(submission);
 
-        // Fetch the quiz for additional information
-        Quiz quiz = quizService.getQuizById(quizId);
+        Quiz quiz = quizService.getQuizWithQuestionsById(quizId);
+        Map<Long, Character> submittedAnswers = submission.getAnswers() == null
+                ? Collections.emptyMap()
+                : submission.getAnswers();
+        int score = quizService.calculateScore(quiz, submittedAnswers);
 
-        // Save the quiz result to the database
-        quizService.saveQuizResult(currentUser, quiz, score); // Using currentUser obtained from session
+        QuizResult quizResult = quizService.saveQuizResult(currentUser, quiz, score, submittedAnswers);
+        return "redirect:/quizzes/results/" + quizResult.getResultToken();
+    }
 
-        // Populate the model with results and correct answers for displaying to the user
-        Map<Long, Character> correctAnswers = quizService.getCorrectAnswers(quizId);
-        correctAnswers.forEach((key, value) -> System.out.println("Question ID: " + key + ", Correct Answer: " + value));
+    @RequestMapping(value = "/results/{resultToken}", method = {RequestMethod.GET, RequestMethod.POST})
+    public String showQuizResult(@PathVariable String resultToken, Model model, HttpServletRequest request) {
+        QuizResult quizResult = quizService.getQuizResultByToken(resultToken);
+        Quiz quiz = quizService.getQuizWithQuestionsById(quizResult.getQuiz().getId());
+        Map<Long, Character> submittedAnswers = quizService.parseSubmittedAnswers(quizResult.getSubmittedAnswers());
+        Map<Long, Character> correctAnswers = quizService.getCorrectAnswers(quiz.getId());
+        String publicResultUrl = buildPublicResultUrl(resultToken, request);
 
-        model.addAttribute("score", score);
-        model.addAttribute("totalQuestions", quiz.getQuestions().size());
-        model.addAttribute("submittedAnswers", submission.getAnswers());
+        model.addAttribute("quiz", quiz);
+        model.addAttribute("score", quizResult.getScore());
+        model.addAttribute("totalQuestions", quizResult.getTotalQuestions());
+        model.addAttribute("submittedAt", quizResult.getSubmittedAt());
         model.addAttribute("correctAnswers", correctAnswers);
+        model.addAttribute("submittedAnswers", submittedAnswers);
+        model.addAttribute("resultToken", resultToken);
+        model.addAttribute("resultUrl", publicResultUrl);
+        model.addAttribute("sharePage", false);
 
-        // Redirect to a "results" view or a confirmation page
         return "quizResults";
     }
 
+    @RequestMapping(value = "/results/share/{resultToken}", method = {RequestMethod.GET, RequestMethod.POST})
+    public String showSharedQuizResult(@PathVariable String resultToken, Model model, HttpServletRequest request) {
+        QuizResult quizResult = quizService.getQuizResultByToken(resultToken);
+        Quiz quiz = quizService.getQuizWithQuestionsById(quizResult.getQuiz().getId());
+        Map<Long, Character> submittedAnswers = quizService.parseSubmittedAnswers(quizResult.getSubmittedAnswers());
+        Map<Long, Character> correctAnswers = quizService.getCorrectAnswers(quiz.getId());
 
-    private int evaluateSubmission(QuizSubmission submission) {
-        int correctAnswers = 0;
-        Quiz quiz = quizService.getQuizById(submission.getQuizId());
-        for (Question question : quiz.getQuestions()) {
-            // Assuming both are of Character type and not null
-            if (Character.toUpperCase(submission.getAnswers().getOrDefault(question.getId(), ' ')) == Character.toUpperCase(question.getCorrectAnswer())) {
-                correctAnswers++;
-            }
-        }
-        return correctAnswers;
+        model.addAttribute("quiz", quiz);
+        model.addAttribute("score", quizResult.getScore());
+        model.addAttribute("totalQuestions", quizResult.getTotalQuestions());
+        model.addAttribute("submittedAt", quizResult.getSubmittedAt());
+        model.addAttribute("correctAnswers", correctAnswers);
+        model.addAttribute("submittedAnswers", submittedAnswers);
+        model.addAttribute("resultToken", resultToken);
+        model.addAttribute("resultUrl", buildPublicResultUrl(resultToken, request));
+        model.addAttribute("sharePage", true);
+
+        return "quizResults";
     }
 
+    @GetMapping("/results/{resultToken}/qr")
+    @ResponseBody
+    public ResponseEntity<byte[]> generateResultQrCode(@PathVariable String resultToken, HttpServletRequest request) {
+        String resultUrl = buildPublicResultUrl(resultToken, request);
+        byte[] qrCode = quizService.generateQrCode(resultUrl, 220, 220);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES).cachePublic())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"quiz-result-qr.png\"")
+                .body(qrCode);
+    }
+
+    private String buildPublicResultUrl(String resultToken, HttpServletRequest request) {
+        String path = "/quizzes/results/share/" + resultToken;
+        if (publicBaseUrl != null && !publicBaseUrl.trim().isEmpty()) {
+            return publicBaseUrl.replaceAll("/+$", "") + path;
+        }
+
+        if (railwayPublicDomain != null && !railwayPublicDomain.trim().isEmpty()) {
+            return "https://" + railwayPublicDomain.replaceAll("^https?://", "").replaceAll("/+$", "") + path;
+        }
+
+        return ServletUriComponentsBuilder.fromRequestUri(request)
+                .replacePath(path)
+                .replaceQuery(null)
+                .build()
+                .toUriString();
+    }
 }
